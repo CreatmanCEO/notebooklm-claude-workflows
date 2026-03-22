@@ -115,7 +115,9 @@ git clone https://github.com/CreatmanCEO/notebooklm-claude-workflows.git ~/noteb
 cp ~/notebooklm-claude-workflows/commands/*.md ~/.claude/commands/
 
 # (Опционально) Добавить инструкции NotebookLM в глобальный конфиг
-cat ~/notebooklm-claude-workflows/config/CLAUDE.md >> ~/.claude/CLAUDE.md
+# Безопасное добавление — не дублирует при повторном запуске
+grep -q "notebooklm-claude-workflows" ~/.claude/CLAUDE.md 2>/dev/null || \
+  cat ~/notebooklm-claude-workflows/config/CLAUDE.md >> ~/.claude/CLAUDE.md
 
 # (Опционально) Мониторинг авторизации — только Windows
 mkdir -p ~/Documents/scripts
@@ -198,7 +200,9 @@ NotebookLM работает через cookies браузера (официал�
 Включённый `config/CLAUDE.md` учит Claude проактивно проверять NotebookLM при работе с незнакомыми библиотеками. Добавь в глобальный конфиг:
 
 ```bash
-cat ~/notebooklm-claude-workflows/config/CLAUDE.md >> ~/.claude/CLAUDE.md
+# Безопасное добавление — не дублирует при повторном запуске
+grep -q "notebooklm-claude-workflows" ~/.claude/CLAUDE.md 2>/dev/null || \
+  cat ~/notebooklm-claude-workflows/config/CLAUDE.md >> ~/.claude/CLAUDE.md
 ```
 
 До: Нужно самому помнить попросить Claude использовать NotebookLM.

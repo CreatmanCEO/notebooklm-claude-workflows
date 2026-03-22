@@ -115,7 +115,9 @@ git clone https://github.com/CreatmanCEO/notebooklm-claude-workflows.git ~/noteb
 cp ~/notebooklm-claude-workflows/commands/*.md ~/.claude/commands/
 
 # (Optional) Add NotebookLM instructions to global config
-cat ~/notebooklm-claude-workflows/config/CLAUDE.md >> ~/.claude/CLAUDE.md
+# Safe append — won't duplicate if already present
+grep -q "notebooklm-claude-workflows" ~/.claude/CLAUDE.md 2>/dev/null || \
+  cat ~/notebooklm-claude-workflows/config/CLAUDE.md >> ~/.claude/CLAUDE.md
 
 # (Optional) Auth monitoring — Windows only
 mkdir -p ~/Documents/scripts
@@ -198,7 +200,9 @@ On Windows: toast notification when cookies expire. On Linux/macOS: log file onl
 The included `config/CLAUDE.md` teaches Claude to proactively check NotebookLM when working with unfamiliar libraries. Append it to your global config:
 
 ```bash
-cat ~/notebooklm-claude-workflows/config/CLAUDE.md >> ~/.claude/CLAUDE.md
+# Safe append — won't duplicate if already present
+grep -q "notebooklm-claude-workflows" ~/.claude/CLAUDE.md 2>/dev/null || \
+  cat ~/notebooklm-claude-workflows/config/CLAUDE.md >> ~/.claude/CLAUDE.md
 ```
 
 Before: You have to remember to ask Claude to use NotebookLM.
