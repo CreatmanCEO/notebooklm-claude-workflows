@@ -51,9 +51,13 @@ Think of it this way:
 
 | Command | What it does |
 |---------|-------------|
-| `/research <topic>` | Full cycle: create notebook → collect sources (URLs, YouTube, Drive, text) → multi-query analysis → generate artifacts (podcast, mind map, flashcards, report) |
+| `/research <topic>` | Full cycle: collect sources → auto-expand via web search → multi-query analysis → Obsidian export → generate artifacts |
+| `/deep-research <topic>` | Multi-iteration deep dive: builds topic tree, asks 3-5 questions per topic, synthesizes comprehensive report with knowledge hierarchy |
 | `/youtube-research <topic>` | YouTube video analysis via NotebookLM. Replaces broken transcript APIs (429 errors). Feed videos → get structured analysis with citations |
 | `/init-notebook <stack>` | Auto-create a NotebookLM notebook with official documentation for your tech stack. Knows URLs for 30+ popular frameworks |
+| `/telegram-to-notebook` | Import Telegram chat exports into NotebookLM. Auto-chunks large JSON files (300K words per chunk) for NotebookLM limits |
+| `/analytics-report` | Feed analytics data (CSV, JSON, API) → NotebookLM analysis → infographic, data table, slides, or briefing doc |
+| `/edit-source` | Edit NotebookLM sources (workaround: extract → edit → replace). Supports Drive sync for Google Docs sources |
 
 ### Automation
 
@@ -214,11 +218,16 @@ After: Claude suggests it automatically when it would help.
 notebooklm-claude-workflows/
 ├── commands/
 │   ├── youtube-research.md    # /youtube-research command
+│   ├── research.md            # /research command (with auto-expand + Obsidian)
+│   ├── deep-research.md       # /deep-research command
 │   ├── init-notebook.md       # /init-notebook command
-│   └── research.md            # /research command
+│   ├── telegram-to-notebook.md # /telegram-to-notebook command
+│   ├── analytics-report.md    # /analytics-report command
+│   └── edit-source.md         # /edit-source command
 ├── scripts/
 │   ├── nlm-auth-check.sh      # Daily auth cookie check
-│   └── setup-nlm-scheduler.ps1 # Windows Task Scheduler setup
+│   ├── setup-nlm-scheduler.ps1 # Windows Task Scheduler setup
+│   └── telegram-chunker.py    # Telegram JSON → NotebookLM chunks
 ├── config/
 │   └── CLAUDE.md              # Global Claude Code instructions
 ├── README.md
