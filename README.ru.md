@@ -51,9 +51,13 @@ Claude Code с MCP-сервером *может* сам разобраться �
 
 | Команда | Что делает |
 |---------|-----------|
-| `/research <тема>` | Полный цикл: создание ноутбука → сбор источников (URL, YouTube, Drive, текст) → многоракурсный анализ → генерация артефактов (подкаст, mind map, карточки, отчёт) |
+| `/research <тема>` | Полный цикл: сбор источников → авто-расширение через веб-поиск → многоракурсный анализ → экспорт в Obsidian → генерация артефактов |
+| `/deep-research <тема>` | Глубокое многоитерационное погружение: строит дерево тем, задаёт 3-5 вопросов по каждой, синтезирует комплексный отчёт с иерархией знаний |
 | `/youtube-research <тема>` | Анализ YouTube видео через NotebookLM. Замена сломанным transcript API (ошибки 429). Загрузи видео → получи структурированный анализ с цитатами |
 | `/init-notebook <стек>` | Автоматическое создание NotebookLM ноутбука с официальной документацией для твоего стека. Знает URL для 30+ популярных фреймворков |
+| `/telegram-to-notebook` | Импорт Telegram-чатов в NotebookLM. Автоматическая разбивка больших JSON на чанки (300K слов) под лимиты NotebookLM |
+| `/analytics-report` | Данные аналитики (CSV, JSON, API) → анализ в NotebookLM → инфографика, таблица, слайды или briefing doc |
+| `/edit-source` | Редактирование источников NotebookLM (обходной путь: извлечь → редактировать → заменить). Поддержка Drive sync для Google Docs |
 
 ### Автоматизация
 
@@ -214,11 +218,16 @@ grep -q "notebooklm-claude-workflows" ~/.claude/CLAUDE.md 2>/dev/null || \
 notebooklm-claude-workflows/
 ├── commands/
 │   ├── youtube-research.md    # команда /youtube-research
+│   ├── research.md            # команда /research (с авто-расширением + Obsidian)
+│   ├── deep-research.md       # команда /deep-research
 │   ├── init-notebook.md       # команда /init-notebook
-│   └── research.md            # команда /research
+│   ├── telegram-to-notebook.md # команда /telegram-to-notebook
+│   ├── analytics-report.md    # команда /analytics-report
+│   └── edit-source.md         # команда /edit-source
 ├── scripts/
 │   ├── nlm-auth-check.sh      # ежедневная проверка cookies
-│   └── setup-nlm-scheduler.ps1 # настройка Task Scheduler
+│   ├── setup-nlm-scheduler.ps1 # настройка Task Scheduler
+│   └── telegram-chunker.py    # Telegram JSON → чанки для NotebookLM
 ├── config/
 │   └── CLAUDE.md              # глобальные инструкции Claude Code
 ├── README.md
