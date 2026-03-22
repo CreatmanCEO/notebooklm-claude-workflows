@@ -26,6 +26,25 @@ Ready-to-use [Claude Code](https://docs.anthropic.com/en/docs/claude-code) workf
 /init-notebook next.js supabase   → docs notebook for your stack
 ```
 
+## Why Commands, Not Just MCP?
+
+Claude Code with the MCP server *can* figure out what to do on its own. But there's a difference between "can" and "does it reliably":
+
+| | Raw MCP tools | With workflow commands |
+|---|---|---|
+| Creates notebook | Yes | Yes |
+| Adds sources with `wait=true` | Sometimes forgets | Always |
+| Multi-angle analysis (summary + patterns + contradictions) | Usually asks 1 question | Always runs full series |
+| Suggests artifacts (podcast, mind map) | Rarely | Always |
+| Structured output with citations | Inconsistent | Standardized |
+| Works the same every time | Depends on context/mood | Deterministic |
+
+Commands are not a crutch — they're **process standardization**. The difference between "write me a deploy script" and `make deploy`. Claude has the tools either way, but commands guarantee the quality of the workflow every time.
+
+Think of it this way:
+- **MCP server** = Claude has hands in NotebookLM
+- **Workflow commands** = Claude has hands + a checklist
+
 ## What's Inside
 
 ### Slash Commands
