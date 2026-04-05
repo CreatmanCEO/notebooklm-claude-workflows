@@ -55,7 +55,7 @@ Think of it this way:
 | `/deep-research <topic>` | Multi-iteration deep dive: builds topic tree, asks 3-5 questions per topic, synthesizes comprehensive report with knowledge hierarchy |
 | `/youtube-research <topic>` | YouTube video analysis via NotebookLM. Replaces broken transcript APIs (429 errors). Feed videos → get structured analysis with citations |
 | `/init-notebook <stack>` | Auto-create a NotebookLM notebook with official documentation for your tech stack. Knows URLs for 30+ popular frameworks |
-| `/telegram-to-notebook` | Import Telegram chat exports into NotebookLM. Auto-chunks large JSON files (300K words per chunk) for NotebookLM limits |
+| `/telegram-to-notebook` | Import Telegram chats including **forum supergroups with topics**. Auto-detects topics, per-topic export, filters stickers/GIFs/video, keeps text/code/PDFs |
 | `/analytics-report` | Feed analytics data (CSV, JSON, API) → NotebookLM analysis → infographic, data table, slides, or briefing doc |
 | `/edit-source` | Edit NotebookLM sources (workaround: extract → edit → replace). Supports Drive sync for Google Docs sources |
 
@@ -185,6 +185,40 @@ Creates a NotebookLM notebook pre-loaded with official docs for your technologie
 Built-in URL hints for 30+ frameworks (Next.js, React, Supabase, Tailwind, Drizzle, Playwright, Electron, and more). Works with any URL — not limited to the built-in list.
 
 Also integrates with `/init-project` — suggests creating a docs notebook when you start a new project.
+
+### /telegram-to-notebook — Forum Chats with Topics
+
+The only tool that handles Telegram **forum supergroups** (chats with nested topics/threads). Automatically detects topic structure and offers three export modes:
+
+```
+/telegram-to-notebook result.json
+
+> 12 topics detected:
+  [598] Latest: 69 messages
+  [599] Offtop RU: 10,627 messages
+  [17296] Docker: 867 messages
+  ...
+
+> Export mode?
+  1. Per-topic (separate file per topic) ← best for targeted analysis
+  2. Filtered (only specific topics)
+  3. All together (single file with topic headers)
+```
+
+**Smart filtering:** Skips stickers, GIFs, video files. Keeps text messages, code snippets, shared documents (PDF, JSON, YAML, Python, Go, etc.). Optimized for IT communities and research channels.
+
+**Tested:** 41K messages, 12 topics, 586K words → 13 files uploaded to NotebookLM in under 2 minutes.
+
+```bash
+# List topics without exporting
+python scripts/telegram-chunker.py result.json --list-topics
+
+# Export all topics separately
+python scripts/telegram-chunker.py result.json --per-topic
+
+# Export only Docker and FAQ topics
+python scripts/telegram-chunker.py result.json --per-topic --topics "Docker,FAQ Remake"
+```
 
 ## Auth Monitoring
 
