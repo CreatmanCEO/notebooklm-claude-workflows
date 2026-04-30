@@ -1,92 +1,99 @@
-<div align="center">
-
-🌐 **Language / Язык**
-
-[![English](https://img.shields.io/badge/English-blue?style=flat-square)](README.md) [![Русский](https://img.shields.io/badge/Русский-red?style=flat-square)](README.ru.md)
-
-</div>
-
 # notebooklm-claude-workflows
 
-Готовые рабочие процессы [Claude Code](https://docs.anthropic.com/en/docs/claude-code) для [Google NotebookLM](https://notebooklm.google.com) — пайплайны исследований, анализ YouTube, документация проектов, мониторинг авторизации.
+[![License: MIT](https://img.shields.io/github/license/CreatmanCEO/notebooklm-claude-workflows?color=yellow)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/CreatmanCEO/notebooklm-claude-workflows?style=flat&color=yellow)](https://github.com/CreatmanCEO/notebooklm-claude-workflows/stargazers)
+[![Validate](https://github.com/CreatmanCEO/notebooklm-claude-workflows/actions/workflows/validate.yml/badge.svg)](https://github.com/CreatmanCEO/notebooklm-claude-workflows/actions/workflows/validate.yml)
+[![Built on notebooklm-mcp-cli](https://img.shields.io/badge/built%20on-notebooklm--mcp--cli-9d6cff)](https://github.com/jacob-bd/notebooklm-mcp-cli)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-Opus%204.7%20%C2%B7%201M%20context-cc785c)](https://code.claude.com)
+[![MCP](https://img.shields.io/badge/MCP-compatible-22c55e)](https://modelcontextprotocol.io)
+[![platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)](#prerequisites)
 
-[![MIT](https://img.shields.io/github/license/CreatmanCEO/notebooklm-claude-workflows?style=flat-square&color=green)](LICENSE) [![Claude Code](https://img.shields.io/badge/Claude_Code-commands-blueviolet?style=flat-square&logo=anthropic&logoColor=white)]() [![platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue?style=flat-square)]()
+🇷🇺 Русский · [🇬🇧 English](README.md)
 
-**Хватит вызывать MCP-инструменты по одному. Скажи что нужно — Claude сделает сам.**
+**Семь slash-команд Claude Code, которые превращают сырые MCP-вызовы NotebookLM в одну строку. Протестировано на форуме Telegram из 41K сообщений, YouTube research-пайплайнах и авто-документации для 30+ фреймворков.**
+
+> **MCP-сервер = у Claude есть руки в NotebookLM.**
+> **Workflow-команды = у Claude есть руки + чек-лист.**
+
+![Архитектура pipeline: slash-команда → 3-фазный пайплайн → MCP tools → NotebookLM](docs/architecture.svg)
 
 ## Проблема
 
-[notebooklm-mcp-cli](https://github.com/jacob-bd/notebooklm-mcp-cli) даёт Claude доступ к NotebookLM — но в виде сырых инструментов. Создать ноутбук, добавить 5 источников, задать вопросы, сгенерировать подкаст — это 10+ ручных вызовов. Оркестрацию приходится делать самому.
+[notebooklm-mcp-cli](https://github.com/jacob-bd/notebooklm-mcp-cli) даёт Claude доступ к NotebookLM — но как сырые tool'ы. Создать ноутбук, добавить 5 источников, опросить, сгенерировать подкаст — это 10+ ручных tool-call'ов. Оркестрация падает на тебя.
 
-**Этот проект решает проблему.** Три slash-команды превращают многошаговые операции с NotebookLM в однострочники:
+**Этот проект решает это.** Slash-команды превращают многошаговые операции NotebookLM в однострочники:
 
 ```
-/research AI агенты 2025            → полный пайплайн исследования с артефактами
-/youtube-research fine-tuning LLM   → YouTube видео → анализ → подкаст
-/init-notebook next.js supabase     → ноутбук с документацией твоего стека
+/research AI agents 2026          → полный research-цикл с артефактами
+/youtube-research LLM fine-tuning → YouTube видео → анализ → подкаст
+/init-notebook next.js supabase   → ноутбук с документацией под твой стек
 ```
 
-## Зачем команды, если есть MCP?
+## Зачем команды, а не просто MCP?
 
-Claude Code с MCP-сервером *может* сам разобраться что делать. Но между "может" и "делает стабильно" — пропасть:
+Claude Code с MCP-сервером *может* сам сообразить что делать. Но между «может» и «делает надёжно» — пропасть:
 
-| | Сырые MCP-инструменты | С командами workflow |
+| | Сырые MCP-tool'ы | С workflow-командами |
 |---|---|---|
-| Создаёт ноутбук | Да | Да |
-| Добавляет источники с `wait=true` | Иногда забывает | Всегда |
-| Многоракурсный анализ (резюме + паттерны + противоречия) | Обычно задаёт 1 вопрос | Всегда полная серия |
-| Предлагает артефакты (подкаст, mind map) | Редко | Всегда |
-| Структурированный вывод с цитатами | Как повезёт | Стандартизирован |
-| Работает одинаково каждый раз | Зависит от контекста и настроения | Детерминировано |
+| Создаёт ноутбук | да | да |
+| Добавляет источники с `wait=true` | иногда забывает | всегда |
+| Multi-angle анализ (summary + patterns + contradictions) | обычно один вопрос | всегда полная серия |
+| Предлагает артефакты (подкаст, mind map) | редко | всегда |
+| Структурированный вывод с цитатами | непостоянно | стандартизировано |
+| Работает одинаково каждый раз | зависит от контекста / настроения | детерминировано |
 
-Команды — не костыль, а **стандартизация процесса**. Разница между "напиши мне скрипт деплоя" и `make deploy`. У Claude есть инструменты в обоих случаях, но команды гарантируют качество рабочего процесса каждый раз.
+Команды — не костыль. Это **стандартизация процесса**. Разница между *«напиши мне deploy-скрипт»* и `make deploy`. Tool'ы у Claude те же — но команды гарантируют качество workflow каждый раз.
 
-Проще говоря:
-- **MCP-сервер** = у Claude есть руки в NotebookLM
-- **Команды workflow** = у Claude есть руки + чеклист
+## Что возвращает `/research`
+
+![Mock-up вывода /research: структурированные находки, паттерны, противоречия с цитатами на NotebookLM-источники](docs/output-mockup.svg)
+
+Цитаты `[1]–[8]` ссылаются на твои NotebookLM-источники — клик в NotebookLM открывает точный фрагмент.
+
+## Замеренное влияние
+
+Реальные продакшн-сценарии с конкретными числами:
+
+| Сценарий | Без workflow-команд | С workflow-командами |
+|---|---|---|
+| Research-pipeline (5 источников → анализ → подкаст) | 10+ ручных tool-call'ов, ~3 мин оркестрации | 1 промпт, автономно |
+| Импорт Telegram forum-supergroup | Нерешаемо — один источник > лимита 500 KB | 41K сообщений · 12 топиков · 586K слов · 13 NotebookLM источников, **меньше 2 минут** |
+| Сбор YouTube-транскриптов | YouTube transcript API возвращают HTTP 429 / заблокированы | 1–10 видео через нативный ingest NotebookLM, без API-ключей |
+| Ноутбук с документацией стека | Вручную: найти URL × N, вставить × N | `/init-notebook fastapi postgres redis` — 30+ фреймворков предмаплены |
+| Мониторинг куки авторизации | «Узнаёшь что куки истекли когда что-то ломается» | Дневная проверка, Windows toast-уведомление до того как сломается |
 
 ## Что внутри
 
 ### Slash-команды
 
 | Команда | Что делает |
-|---------|-----------|
-| `/research <тема>` | Полный цикл: сбор источников → авто-расширение через веб-поиск → многоракурсный анализ → экспорт в Obsidian → генерация артефактов |
-| `/deep-research <тема>` | Глубокое многоитерационное погружение: строит дерево тем, задаёт 3-5 вопросов по каждой, синтезирует комплексный отчёт с иерархией знаний |
-| `/youtube-research <тема>` | Анализ YouTube видео через NotebookLM. Замена сломанным transcript API (ошибки 429). Загрузи видео → получи структурированный анализ с цитатами |
-| `/init-notebook <стек>` | Автоматическое создание NotebookLM ноутбука с официальной документацией для твоего стека. Знает URL для 30+ популярных фреймворков |
-| `/telegram-to-notebook` | Импорт Telegram-чатов включая **форум-супергруппы с темами**. Автоопределение тем, экспорт по темам, фильтрация стикеров/GIF/видео, сохранение текста/кода/PDF |
-| `/analytics-report` | Данные аналитики (CSV, JSON, API) → анализ в NotebookLM → инфографика, таблица, слайды или briefing doc |
-| `/edit-source` | Редактирование источников NotebookLM (обходной путь: извлечь → редактировать → заменить). Поддержка Drive sync для Google Docs |
+|---|---|
+| `/research <тема>` | Полный цикл: сбор → авто-расширение через web search → multi-query анализ → Obsidian export → опциональные артефакты |
+| `/deep-research <тема>` | Multi-iteration deep dive: строит дерево тем, задаёт 3–5 уточняющих вопросов на каждую, синтезирует комплексный отчёт |
+| `/youtube-research <тема>` | Анализ YouTube-видео через NotebookLM. Заменяет ломающиеся transcript-API (429-ошибки). 1–10 видео → структурированный анализ с цитатами |
+| `/init-notebook <стек>` | Авто-создание NotebookLM-ноутбука с официальной документацией. URL-подсказки для 30+ популярных фреймворков |
+| `/telegram-to-notebook` | Импорт Telegram-чатов включая **forum-supergroups с топиками**. Авто-определение топиков, per-topic export, фильтрация стикеров/GIF/видео, оставляет текст/код/PDF |
+| `/analytics-report` | Аналитические данные (CSV / JSON / API) → анализ через NotebookLM → инфографика, таблица, слайды или briefing-документ |
+| `/edit-source` | Редактирование NotebookLM-источников через extract → edit → replace workaround. Поддерживает Drive sync для Google Docs |
+
+### Когда какую research-команду выбрать
+
+| Кейс | Команда |
+|---|---|
+| One-pass research с 3 углами (summary / patterns / contradictions) | `/research` |
+| Глубокое погружение с 5 вопросами на топик и деревом знаний | `/deep-research` |
+| Конкретно YouTube как первичные источники | `/youtube-research` |
+| Telegram forum / supergroup ingestion | `/telegram-to-notebook` |
 
 ### Автоматизация
 
 | Компонент | Что делает |
-|-----------|-----------|
-| `nlm-auth-check.sh` | Ежедневная проверка cookies с Windows-уведомлениями при истечении |
-| `setup-nlm-scheduler.ps1` | Настройка Windows Task Scheduler в один клик |
-| `CLAUDE.md` конфиг | Глобальные инструкции, чтобы Claude сам предлагал NotebookLM при работе с незнакомыми технологиями |
+|---|---|
+| `nlm-auth-check.sh` | Дневная проверка здоровья куки + Windows toast при истечении |
+| `setup-nlm-scheduler.ps1` | One-click установка через Windows Task Scheduler |
+| `config/CLAUDE.md` | Global-инструкции, чтобы Claude проактивно предлагал NotebookLM при работе с незнакомыми технологиями |
 
-## Как это работает
-
-```
-Ты: /research AI-ассистенты для кода
-
-Claude (автономно):
-  1. Создаёт ноутбук "Research: AI-ассистенты для кода"
-  2. Спрашивает источники → ты вставляешь URL, YouTube ссылки, текст
-  3. Добавляет каждый источник в NotebookLM (с прогрессом)
-  4. Запускает многоракурсный анализ:
-     - Суммаризация ключевых идей
-     - Паттерны между источниками
-     - Противоречия между источниками
-  5. Возвращает структурированный отчёт с цитатами
-  6. Предлагает сгенерировать: подкаст / mind map / карточки / квиз
-```
-
-Никаких ручных вызовов инструментов. Никакого переключения контекста. Никакого копирования между вкладками.
-
-## Требования
+## Зависимости
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) установлен и работает
 - [notebooklm-mcp-cli](https://github.com/jacob-bd/notebooklm-mcp-cli) установлен и авторизован:
@@ -95,7 +102,7 @@ Claude (автономно):
   nlm login
   nlm setup add claude-code
   ```
-- Перезапуск Claude Code после настройки MCP
+- Перезапусти Claude Code после MCP-настройки
 
 ## Установка
 
@@ -104,26 +111,26 @@ Claude (автономно):
 Открой Claude Code и скажи:
 
 ```
-Склонируй https://github.com/CreatmanCEO/notebooklm-claude-workflows и установи
+Клонируй https://github.com/CreatmanCEO/notebooklm-claude-workflows и установи
 ```
 
-Claude сам склонирует репо и скопирует команды в нужные места.
+Claude склонирует репо и положит команды в нужные места.
 
 ### Ручная
 
 ```bash
-# Клонировать
+# Клон
 git clone https://github.com/CreatmanCEO/notebooklm-claude-workflows.git ~/notebooklm-claude-workflows
 
 # Скопировать slash-команды
 cp ~/notebooklm-claude-workflows/commands/*.md ~/.claude/commands/
 
-# (Опционально) Добавить инструкции NotebookLM в глобальный конфиг
-# Безопасное добавление — не дублирует при повторном запуске
+# (Опционально) NotebookLM-инструкции в global config
+# Безопасный append — не дублируется
 grep -q "notebooklm-claude-workflows" ~/.claude/CLAUDE.md 2>/dev/null || \
   cat ~/notebooklm-claude-workflows/config/CLAUDE.md >> ~/.claude/CLAUDE.md
 
-# (Опционально) Мониторинг авторизации — только Windows
+# (Опционально) Auth monitoring — только Windows
 mkdir -p ~/Documents/scripts
 cp ~/notebooklm-claude-workflows/scripts/* ~/Documents/scripts/
 chmod +x ~/Documents/scripts/nlm-auth-check.sh
@@ -134,161 +141,192 @@ powershell -ExecutionPolicy Bypass -File ~/Documents/scripts/setup-nlm-scheduler
 
 ## Детали команд
 
-### /research — Полный пайплайн исследования
+### /research — полный research-pipeline
 
 Три фазы, полностью автономно:
 
-**Фаза 1 — Сбор:** Создаёт NotebookLM ноутбук, принимает любой микс источников (YouTube, веб-страницы, Google Drive, текст), добавляет с отслеживанием прогресса.
+**Фаза 1 — Сбор** · Создаёт NotebookLM-ноутбук, принимает любой микс источников (YouTube, веб-страницы, Google Drive, текст), добавляет с прогрессом. Опционально автоматически расширяет базу через `research_start`.
 
-**Фаза 2 — Анализ:** Серия целевых запросов к ноутбуку — суммаризация, поиск паттернов, анализ противоречий, плюс твои вопросы. Возвращает структурированный отчёт с цитатами из ТВОИХ источников.
+**Фаза 2 — Анализ** · Серия точечных запросов к ноутбуку — суммаризация, поиск паттернов, анализ противоречий + твои кастомные вопросы. Возвращает структурированный отчёт с цитатами из источников.
 
-**Фаза 3 — Артефакты:** Опционально генерирует контент через NotebookLM Studio:
+**Фаза 3 — Артефакты** · Опционально генерирует NotebookLM Studio контент:
 
-| Артефакт | Формат | Для чего |
-|----------|--------|----------|
-| Audio Overview | MP3 | Подкаст с двумя AI-ведущими, обсуждающими твои источники |
+| Артефакт | Формат | Use case |
+|---|---|---|
+| Audio Overview | MP3 | Подкаст с двумя AI-ведущими |
 | Mind Map | JSON | Визуальная структура знаний |
-| Flashcards | JSON/HTML | Карточки для запоминания из материалов |
-| Briefing Doc | Markdown | Краткое резюме для руководства |
-| Quiz | JSON/HTML | Тест на понимание материала |
+| Flashcards | JSON / HTML | Карточки для запоминания |
+| Briefing Doc | Markdown | Executive summary |
+| Quiz | JSON / HTML | Тест по материалу |
 
-### /youtube-research — YouTube без ошибок 429
+### /youtube-research — YouTube без 429-ошибок
 
-YouTube transcript API всё чаще блокируется (HTTP 429). NotebookLM принимает YouTube нативно — без API-ключей, без лимитов.
+YouTube transcript API всё чаще блокируются (HTTP 429). NotebookLM нативно понимает YouTube — без API-ключей, без rate limits.
 
 ```
 /youtube-research React Server Components
 
-> Вставь 1-10 YouTube ссылок:
+> Вставь 1–10 YouTube-ссылок:
 https://youtu.be/abc123
 https://youtu.be/def456
 https://youtu.be/ghi789
 
-→ Создаёт ноутбук, загружает все видео
-→ Структурированный анализ с резюме по каждому видео
-→ Паттерны и инсайты между видео
-→ Опционально: сгенерировать подкаст из всех видео
+→ Создаётся ноутбук, заливаются все видео
+→ Структурированный анализ с per-video summary
+→ Cross-video паттерны и инсайты
+→ Опционально: подкаст из всех видео
 ```
 
-### /init-notebook — Документация для твоего стека
+### /init-notebook — документация под твой стек
 
-Создаёт NotebookLM ноутбук с предзагруженной официальной документацией:
+Создаёт NotebookLM-ноутбук с предзагруженной официальной документацией:
 
 ```
 /init-notebook fastapi postgresql redis
 
-→ Создаёт ноутбук "fastapi postgresql redis Docs"
-→ Добавляет документацию FastAPI, PostgreSQL, Redis
-→ Готов к запросам: "Как настроить connection pooling с FastAPI + PostgreSQL?"
+→ Создаётся "fastapi postgresql redis Docs"
+→ Добавляются FastAPI docs, PostgreSQL docs, Redis docs
+→ Готов к запросам: "Как настроить connection pooling FastAPI + PostgreSQL?"
 ```
 
-Встроенные подсказки URL для 30+ фреймворков (Next.js, React, Supabase, Tailwind, Drizzle, Playwright, Electron и другие). Работает с любым URL — не ограничен встроенным списком.
+URL-подсказки для 30+ фреймворков (Next.js, React, Supabase, Tailwind, Drizzle, Playwright, Electron и т.д.). Работает с любым URL — не ограничено встроенным списком.
 
-Интегрирован с `/init-project` — предлагает создать ноутбук с документацией при старте нового проекта.
+### /telegram-to-notebook — форум-чаты с топиками
 
-### /telegram-to-notebook — Форум-чаты с темами
-
-Единственный инструмент, который корректно обрабатывает Telegram **форум-супергруппы** (чаты с вложенными темами/тредами). Автоматически определяет структуру тем и предлагает три режима экспорта:
+Единственный инструмент, который умеет в Telegram **forum-supergroups** (чаты с вложенными топиками / тредами). Авто-определение структуры топиков и три режима экспорта:
 
 ```
 /telegram-to-notebook result.json
 
-> Обнаружено 12 тем:
+> Найдено 12 топиков:
   [598] Latest: 69 сообщений
-  [599] Offtop RU: 10,627 сообщений
+  [599] Offtop RU: 10 627 сообщений
   [17296] Docker: 867 сообщений
   ...
 
 > Режим экспорта?
-  1. По темам (отдельный файл на тему) ← лучше для целевого анализа
-  2. Выборочно (только конкретные темы)
-  3. Всё вместе (один файл с заголовками тем)
+  1. Per-topic (отдельный файл на топик) ← лучшее для точечного анализа
+  2. Filtered (только конкретные топики)
+  3. All together (один файл с заголовками топиков)
 ```
 
-**Умная фильтрация:** Пропускает стикеры, GIF, видеофайлы. Сохраняет текстовые сообщения, фрагменты кода, документы (PDF, JSON, YAML, Python, Go и др.). Оптимизировано для IT-сообществ и исследовательских каналов.
+**Smart-фильтрация:** пропускает стикеры, GIF, видео. Оставляет текстовые сообщения, код, документы (PDF, JSON, YAML, Python, Go и т.д.). Оптимизировано под IT-комьюнити и research-каналы.
 
-**Протестировано:** 41K сообщений, 12 тем, 586K слов → 13 файлов загружено в NotebookLM менее чем за 2 минуты.
+**Протестировано:** 41K сообщений, 12 топиков, 586K слов → 13 файлов в NotebookLM меньше чем за 2 минуты.
 
 ```bash
-# Показать темы без экспорта
+# Список топиков без экспорта
 python scripts/telegram-chunker.py result.json --list-topics
 
-# Экспортировать все темы по отдельности
+# Экспорт всех топиков отдельно
 python scripts/telegram-chunker.py result.json --per-topic
 
-# Экспортировать только Docker и FAQ
+# Только Docker и FAQ
 python scripts/telegram-chunker.py result.json --per-topic --topics "Docker,FAQ Remake"
 ```
 
-## Мониторинг авторизации
+## Auth monitoring
 
-NotebookLM работает через cookies браузера (официального API нет). Cookies истекают. Скрипт проверки запускается ежедневно и предупреждает заранее:
+NotebookLM использует браузерные куки (нет официального API). Куки истекают. Auth-check скрипт работает каждый день и предупреждает заранее:
 
 ```
-[2026-03-23 10:00:01] AUTH OK — 5 notebooks accessible
-[2026-03-25 10:00:01] AUTH EXPIRED — run: nlm login
+[2026-03-23 10:00:01] AUTH OK — 5 ноутбуков доступно
+[2026-03-25 10:00:01] AUTH EXPIRED — запусти: nlm login
 ```
 
-На Windows: всплывающее уведомление при истечении cookies. На Linux/macOS: только лог-файл (PR с нативными уведомлениями приветствуются).
+Windows: toast-уведомление при истечении. Linux/macOS: только лог-файл (PR на нативные уведомления приветствуются — см. [`CONTRIBUTING.md`](CONTRIBUTING.md)).
 
 ## Конфигурация
 
-### Интеграция с CLAUDE.md
+### Интеграция CLAUDE.md
 
-Включённый `config/CLAUDE.md` учит Claude проактивно проверять NotebookLM при работе с незнакомыми библиотеками. Добавь в глобальный конфиг:
+`config/CLAUDE.md` учит Claude проактивно проверять NotebookLM при работе с незнакомыми библиотеками. Добавь в global config:
 
 ```bash
-# Безопасное добавление — не дублирует при повторном запуске
+# Безопасный append
 grep -q "notebooklm-claude-workflows" ~/.claude/CLAUDE.md 2>/dev/null || \
   cat ~/notebooklm-claude-workflows/config/CLAUDE.md >> ~/.claude/CLAUDE.md
 ```
 
-До: Нужно самому помнить попросить Claude использовать NotebookLM.
-После: Claude предлагает это автоматически, когда это полезно.
+До: ты должен помнить, чтобы попросить Claude использовать NotebookLM.
+После: Claude сам предлагает, когда это поможет.
+
+## Ограничения
+
+Это workflow-слой над `notebooklm-mcp-cli`, который сам — обёртка над неофициальным браузерным API NotebookLM. Честные ограничения:
+
+- **Истечение куки — реальное и регулярное.** У NotebookLM нет официального API; MCP-сервер работает через куки браузера, которые истекают по расписанию Google (обычно раз в несколько недель). Auth-check ловит это заранее, но `nlm login` всё равно нужен. Считай ~30 секунд friction раз в 2–3 недели.
+- **500K слов на источник.** NotebookLM ограничивает каждый источник 500K слов. Telegram chunker по умолчанию делает 300K на чанк с запасом. Для очень больших корпусов планируй несколько чанков на топик.
+- **`/edit-source` — workaround, не нативная фича.** У NotebookLM нет API для редактирования источника. Команда делает extract → edit → replace, что означает короткое окно когда источник отсутствует в ноутбуке. Не запускай посреди серии запросов.
+- **Определение forum-supergroup — эвристика.** Telegram chunker определяет топики по полям `topic_message_id` и действиям `forum_topic_created`. Telegram уже менял формат экспорта; если экспорт из старой версии клиента — определение топиков может ошибиться. Сначала `--list-topics` для проверки.
+- **Rate limits NotebookLM непрозрачны.** Google не публикует их. MCP-сервер ретраит на 429, но heavy-research сессии (50+ запросов подряд) иногда стопорятся. Workaround: разделяй на несколько ноутбуков.
+- **Slash-команды — только Claude Code.** Claude Desktop получает сырые MCP-tool'ы без workflow-автоматизации — см. [notebooklm-mcp-cli](https://github.com/jacob-bd/notebooklm-mcp-cli) для Desktop setup.
+- **Native-уведомления пока только Windows.** macOS `osascript` и Linux `notify-send` — открытые контрибы в [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- **Вся система зависит от upstream MCP-сервера.** Если `notebooklm-mcp-cli` ломается, ломаются все команды. Пинуй известно-рабочую версию MCP в продакшне.
+
+## FAQ
+
+**Q: Это MCP-сервер?**
+Нет. Это workflow-слой поверх [notebooklm-mcp-cli](https://github.com/jacob-bd/notebooklm-mcp-cli). Думай как макросы + шаблоны для MCP-tool'ов. MCP-сервер должен быть установлен сначала.
+
+**Q: Работает с Claude Desktop?**
+Slash-команды специфичны для Claude Code. Desktop получает MCP-tool'ы напрямую, но без workflow-автоматизации. См. [notebooklm-mcp-cli docs](https://github.com/jacob-bd/notebooklm-mcp-cli) для Desktop.
+
+**Q: Что делать с истечением куки?**
+Скрипт auth monitoring проверяет ежедневно и уведомляет. Когда куки истекли — `nlm login` за 30 секунд.
+
+**Q: Можно ли добавлять свои команды?**
+Конечно. Положи любой `.md` в `~/.claude/commands/` в том же формате. См. существующие команды как примеры и [`CONTRIBUTING.md`](CONTRIBUTING.md) для приоритетов.
 
 ## Структура проекта
 
 ```
 notebooklm-claude-workflows/
 ├── commands/
-│   ├── youtube-research.md    # команда /youtube-research
-│   ├── research.md            # команда /research (с авто-расширением + Obsidian)
-│   ├── deep-research.md       # команда /deep-research
-│   ├── init-notebook.md       # команда /init-notebook
-│   ├── telegram-to-notebook.md # команда /telegram-to-notebook
-│   ├── analytics-report.md    # команда /analytics-report
-│   └── edit-source.md         # команда /edit-source
+│   ├── research.md            # /research — полный pipeline
+│   ├── deep-research.md       # /deep-research — multi-iteration deep dive
+│   ├── youtube-research.md    # /youtube-research — YouTube через NotebookLM
+│   ├── init-notebook.md       # /init-notebook — ноутбук под стек
+│   ├── telegram-to-notebook.md # /telegram-to-notebook — forum-aware импорт
+│   ├── analytics-report.md    # /analytics-report — данные → инфографика / отчёт
+│   └── edit-source.md         # /edit-source — extract → edit → replace
 ├── scripts/
-│   ├── nlm-auth-check.sh      # ежедневная проверка cookies
-│   ├── setup-nlm-scheduler.ps1 # настройка Task Scheduler
-│   └── telegram-chunker.py    # Telegram JSON → чанки для NotebookLM
+│   ├── telegram-chunker.py    # Telegram JSON → NotebookLM чанки (forum-aware)
+│   ├── nlm-auth-check.sh      # Дневная проверка куки
+│   └── setup-nlm-scheduler.ps1 # Windows Task Scheduler установщик
 ├── config/
-│   └── CLAUDE.md              # глобальные инструкции Claude Code
+│   └── CLAUDE.md              # Сниппет global-инструкций Claude Code
+├── docs/
+│   ├── architecture.svg       # Pipeline-диаграмма
+│   └── output-mockup.svg      # Mock-up вывода /research
 ├── README.md
 ├── README.ru.md
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── CLAUDE.md                  # Level 1 файл этого репо (eats own dog food)
 ├── LICENSE
-└── .gitignore
+└── .github/workflows/validate.yml
 ```
-
-## FAQ
-
-**Q: Это MCP-сервер?**
-Нет. Это слой рабочих процессов поверх [notebooklm-mcp-cli](https://github.com/jacob-bd/notebooklm-mcp-cli). Думай об этом как о макросах и шаблонах для MCP-инструментов. MCP-сервер нужно установить отдельно.
-
-**Q: Работает с Claude Desktop?**
-Slash-команды специфичны для Claude Code. Пользователи Claude Desktop получают MCP-инструменты напрямую, но без автоматизации рабочих процессов. См. [документацию notebooklm-mcp-cli](https://github.com/jacob-bd/notebooklm-mcp-cli) для настройки Desktop.
-
-**Q: Что с истечением cookies?**
-Скрипт мониторинга проверяет ежедневно и уведомляет. Когда cookies истекают — просто запусти `nlm login`, это 30 секунд.
-
-**Q: Могу добавить свои команды?**
-Конечно. Положи любой `.md` файл в `~/.claude/commands/` в том же формате. Используй существующие команды как пример.
 
 ## Связанные проекты
 
-- [notebooklm-mcp-cli](https://github.com/jacob-bd/notebooklm-mcp-cli) — MCP-сервер, на котором строится этот проект (обязателен)
-- [claude-statusline](https://github.com/CreatmanCEO/claude-statusline) — Умная статус-строка для Claude Code (от того же автора)
+- [notebooklm-mcp-cli](https://github.com/jacob-bd/notebooklm-mcp-cli) — MCP-сервер, на который опирается этот проект (обязателен)
+- [Claude Code Anti-Regression Setup](https://github.com/CreatmanCEO/claude-code-antiregression-setup) — sister-репо, тот же автор. CLAUDE.md + субагенты + хуки чтобы Claude не сломал твой код пока крутит эти workflow.
+- [ai-context-hierarchy](https://github.com/CreatmanCEO/ai-context-hierarchy) — sister-репо. Трёхуровневая система контекста; `config/CLAUDE.md` отсюда — Level 0 фрагмент, который натурально вливается в её иерархию.
+- [claude-statusline](https://github.com/CreatmanCEO/claude-statusline) — sister-репо. Умная status-строка для Claude Code; дополняющий инструмент той же экосистемы.
+
+## Контрибьют
+
+PR приветствуются — см. [CONTRIBUTING.md](CONTRIBUTING.md). Текущие приоритеты: native-уведомления для Linux/macOS auth-check, расширение URL-словаря в `/init-notebook`, новые slash-команды (PDF research, podcast-to-notebook), переводы команд на другие локали.
+
+## Автор
+
+**Николай Подоляк (Nick Podolyak)** — Python-разработчик и цифровой архитектор в [CREATMAN](https://creatman.site)
+
+- GitHub: [@CreatmanCEO](https://github.com/CreatmanCEO)
+- Habr: [creatman](https://habr.com/ru/users/creatman/)
+- dev.to: [@creatman](https://dev.to/creatman)
 
 ## Лицензия
 
-MIT — [Nick Podolyak](https://github.com/CreatmanCEO) / CREATMAN Studio
+[MIT](LICENSE) · Николай Подоляк
